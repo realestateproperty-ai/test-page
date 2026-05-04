@@ -377,7 +377,7 @@
       const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOC_ID);
       squareCard = await payments.card({
         style: {
-          input: { backgroundColor: '#ffffff', color: '#001D21', fontSize: '14px', fontFamily: "'DM Sans', sans-serif" },
+          input: { backgroundColor: '#ffffff', color: '#001D21', fontSize: '14px', },
           'input::placeholder': { color: 'rgba(74,107,111,0.4)' },
           '.input-container.is-focus': { borderColor: '#7ABC32' },
           '.input-container.is-error': { borderColor: '#E24B4A' },
