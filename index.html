@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Payment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://web.squarecdn.com/v1/square.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --dark: #001D21;
+    --green: #7ABC32;
+    --green-hover: #5E9A22;
+    --green-pale: #F6F9F1;
+    --green-light: #D4E3C8;
+    --muted: #4A6B6F;
+    --border: #D4E3C8;
+    --white: #ffffff;
+    --red: #E24B4A;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--green-pale);
+    color: var(--dark);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 20px;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: 0 8px 48px rgba(0,29,33,0.10);
+    overflow: hidden;
+  }
+
+  .card-header {
+    background: var(--dark);
+    padding: 32px 36px 28px;
+  }
+  .card-header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .logo-dot {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-dot svg { width: 18px; height: 18px; }
+  .logo-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green-pale);
+    letter-spacing: -0.02em;
+  }
+  .logo-sub {
+    font-size: 10px;
+    color: rgba(246,249,241,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 1px;
+  }
+  .header-amount-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: rgba(246,249,241,0.45);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+  .header-amount {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--green-pale);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .header-desc {
+    font-size: 13px;
+    color: rgba(246,249,241,0.45);
+    font-weight: 300;
+  }
+
+  .card-body {
+    padding: 32px 36px 36px;
+  }
+
+  .form-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    margin-top: 24px;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 12px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--dark);
+    background: var(--white);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .form-input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(122,188,50,0.12);
+  }
+  .form-input::placeholder { color: rgba(74,107,111,0.4); }
+
+  #card-container {
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 12px 14px;
+    background: var(--white);
+    min-height: 46px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  #card-container.focused {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(122,188,50,0.12);
+  }
+  .card-brands {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .card-brand {
+    background: var(--green-pale);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .error-box {
+    background: rgba(226,75,75,0.07);
+    border: 1px solid rgba(226,75,75,0.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: #A32D2D;
+    margin-top: 8px;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--green);
+    color: var(--dark);
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 24px;
+    transition: background 0.18s, transform 0.12s, box-shadow 0.18s;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+  .submit-btn:hover:not(:disabled) {
+    background: var(--green-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(122,188,50,0.3);
+  }
+  .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+  .submit-sub {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2px solid rgba(0,29,33,0.3);
+    border-top-color: var(--dark);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .submit-btn.loading .spinner { display: block; }
+  .submit-btn.loading .btn-text { display: none; }
+
+  .success-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--green-pale);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .success-overlay.open { display: flex; }
+  .success-card {
+    background: var(--white);
+    border-radius: 20px;
+    padding: 48px 40px;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 48px rgba(0,29,33,0.10);
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .success-icon {
+    width: 64px; height: 64px;
+    background: var(--green);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .success-icon svg { width: 30px; height: 30px; }
+  .success-title {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: -0.03em;
+    margin-bottom: 10px;
+  }
+  .success-sub { font-size: 15px; color: var(--muted); font-weight: 300; margin-bottom: 28px; }
+  .success-amount {
+    display: inline-block;
+    background: var(--green-pale);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 500;
+    color: var(--dark);
+    margin-bottom: 24px;
+  }
+  .success-note {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    background: rgba(122,188,50,0.07);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+
+  @media (max-width: 480px) {
+    body { padding: 12px; }
+    .card-header { padding: 24px 20px 20px; }
+    .card-body { padding: 24px 20px 28px; }
+    .header-amount { font-size: 36px; }
+    .form-row { grid-template-columns: 1fr; }
+    .success-card { padding: 36px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-header-logo">
+      <div class="logo-dot">
+        <svg viewBox="0 0 18 18" fill="none">
+          <path d="M9 2l1.5 4.5H15l-3.5 2.5 1.5 4.5L9 11l-4 2.5 1.5-4.5L3 6.5h4.5z" fill="#001D21"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">The Tax Academy</div>
+        <div class="logo-sub">LLC</div>
+      </div>
+    </div>
+    <div class="header-amount-label">Amount Due</div>
+    <div class="header-amount" id="header-amount">$255.00</div>
+    <div class="header-desc" id="header-desc">401(k) Annual Renewal</div>
+  </div>
+
+  <div class="card-body">
+    <div class="form-section-label">Card Details</div>
+    <div class="card-brands">
+      <span class="card-brand">VISA</span>
+      <span class="card-brand">MC</span>
+      <span class="card-brand">AMEX</span>
+      <span class="card-brand">DISC</span>
+    </div>
+    <div id="card-container"></div>
+    <div class="error-box" id="square-error"></div>
+
+    <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
+      <span class="btn-text">Pay Now</span>
+      <div class="spinner"></div>
+    </button>
+    <div class="submit-sub">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="2" y="5" width="8" height="6" rx="1.5" stroke="#4A6B6F" stroke-width="1.2"/><path d="M4 5V3.5a2 2 0 014 0V5" stroke="#4A6B6F" stroke-width="1.2"/></svg>
+      Secured by Square · Your card data never touches our servers
+    </div>
+  </div>
+</div>
+
+<div class="success-overlay" id="success-overlay">
+  <div class="success-card">
+    <div class="success-icon">
+      <svg viewBox="0 0 30 30" fill="none"><path d="M6 15l6 6 12-12" stroke="#001D21" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="success-title">Payment Received</div>
+    <p class="success-sub">Your 401(k) plan has been processed successfully.</p>
+    <div class="success-amount" id="success-amount">$200.00</div>
+    <div class="success-note">A confirmation and receipt have been sent to your email address. Our team will be in touch shortly.</div>
+  </div>
+</div>
+
+<script>
+  const SQUARE_APP_ID = 'sq0idp-RFKSkhQV6l_AFOr-shRSJQ';
+  const SQUARE_LOC_ID = 'LYP86WFFV4DEN';
+  const WEBHOOK_URL   = 'https://n8n.coreautomations.org/webhook/9bce1118-900c-4905-be47-b2ae6fa3ae17';
+
+  const AMOUNT_CENTS  = 1;
+  const AMOUNT_LABEL  = '$200.00';
+  const DESCRIPTION   = '401(k) Annual Renewal';
+
+  let squareCard = null;
+
+  async function initSquare() {
+    if (!window.Square) { console.error('Square SDK not loaded'); return; }
+    try {
+      const payments = window.Square.payments(SQUARE_APP_ID, SQUARE_LOC_ID);
+      squareCard = await payments.card({
+        style: {
+          input: { backgroundColor: '#ffffff', color: '#001D21', fontSize: '14px', fontFamily: "'DM Sans', sans-serif" },
+          'input::placeholder': { color: 'rgba(74,107,111,0.4)' },
+          '.input-container.is-focus': { borderColor: '#7ABC32' },
+          '.input-container.is-error': { borderColor: '#E24B4A' },
+        }
+      });
+      await squareCard.attach('#card-container');
+    } catch (e) {
+      console.error('Square init failed:', e);
+      showError('square-error', 'Payment system failed to load. Please refresh the page.');
+    }
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('visible');
+  }
+  function hideError(id) { document.getElementById(id).classList.remove('visible'); }
+
+  function setLoading(on) {
+    const btn = document.getElementById('submit-btn');
+    btn.classList.toggle('loading', on);
+    btn.disabled = on;
+  }
+
+  async function handleSubmit() {
+    hideError('square-error');
+
+    if (!squareCard) {
+      showError('square-error', 'Payment system is not ready. Please refresh the page.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await squareCard.tokenize();
+      if (result.status !== 'OK') {
+        const msgs = result.errors ? result.errors.map(e => e.message).join(' ') : 'Card verification failed.';
+        showError('square-error', msgs);
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        square_source_id: result.token,
+        amount_cents:     AMOUNT_CENTS,
+        currency:         'USD',
+        description:      DESCRIPTION,
+        submitted_at:     new Date().toISOString(),
+      };
+
+      const res  = await fetch(WEBHOOK_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+
+      if (res.ok && data.success !== false) {
+        document.getElementById('success-amount').textContent = AMOUNT_LABEL;
+        document.getElementById('success-overlay').classList.add('open');
+      } else {
+        const errMsg = data.error || 'Payment failed. Please try again.';
+        showError('square-error', errMsg);
+      }
+    } catch (err) {
+      console.error(err);
+      showError('square-error', 'An error occurred. Please try again.');
+    }
+
+    setLoading(false);
+  }
+
+  window.addEventListener('DOMContentLoaded', initSquare);
+</script>
+</body>
+</html>
